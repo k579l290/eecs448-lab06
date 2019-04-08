@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+ <head>
+   <meta charset="UTF-8" />
+   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+   <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+   <title>Vue Lab</title>
+   <link
+     rel="stylesheet" 
+	 href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+	 integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
+     crossorigin="anonymous"
+   />
+ </head>
+ 
+ 
+ <body>
+	<!--get vue-->
+   <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+   
+   <div class="container">
+     <div id="app">
+       Message: {{ message }} <br>
+       <!--
+	   <ol>
+		<li v-for="todo in todos" :key="todo.id">
+			{{ todo.text}}
+		</li>
+	   </ol>
+      -->
+	  Number of stops to show:
+      <input type="number" v-model.number="numStops" min="0"></input>
+      <div v-for="stop in filteredStops" v-bind:value="stop.value">
+        <div class="card w-100 shadow bg-light" style="width: 18rem;">
+        <div class="card-body">
+          <h5 class="card-title">{{ stop["name"] }}</h5>
+          <h6 class="card-subtitle mb-2 text-muted">Distance: {{ Math.sqrt(((stop["lat"] - latitude) ** 2) + ((stop["lon"] - longitude) ** 2)) * 111}} km</h6>
+		  <!--distance(latitude, longitude, stop["lat"], stop["long"]) * 111 does not work, must render function but you can use statments-->
+          <p class="card-text">{{ stop["description"] }}</p>
+        </div>
+        </div>
+     </div>
+   </div>
+   </div>
+
+   <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+   <script
+     src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+     integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+     crossorigin="anonymous"
+   ></script>
+   <script
+     src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+     integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+     crossorigin="anonymous"
+   ></script>
+
+   <script>
+   const app = new Vue({
+     el: '#app',
+     data:
+       {
+         message: 'Hello Vue!',
+         todos:
+           [
+             { id: 0, text: 'Finish lab 6' },
+			 { id: 1, text: 'Finish project 3' },
+			 { id: 2, text: 'Prepare for research meeting on Wednesday' },
+			 { id: 3, text: 'Complete all math homework by Tuesday'}
+           ],
+         stops: [],
+         numStops: 10,
+         latitude: 0,
+         longitude: 0
+       },
+	   
+	 /*mounted: function () {
+    // Code that will run only after the
+    // entire view has been rendered
+		     fetch('https://utils.pauliankline.com/stops.json')
+     .then(function(response) 
+		{
+			return response.json();
+	 })
+     .then(function(myJson) 
+		{
+			app.stops = myJson; //fetches content of stops from json file
+	 });
+		
+		},
+	},*/
+     computed:
+      {
+        filteredStops: function()
+        {
+          //sort by distance 
+		  //https://www.w3schools.com/jsref/jsref_sort.asp
+		  let arr =  this.stops.sort((a, b) => (
+		  distance(this.latitude, this.longitude, a['lat'], a['lon']) - distance(this.latitude, this.longitude, b['lat'], b['lon']) 
+		  ));
+		  
+		  //array indices from 0 to numStops - 1
+		  let arr_1 = [];
+		  for (let i = 0; i < this.numStops; i++) {
+			arr_1.push(arr[i]);
+			}
+			
+			return arr_1;
+        }
+      }
+	  /*//method:
+		distance: function(lat_a, lon_a, lat_b, lon_b)
+    {
+      return Math.sqrt(((lat_b - lat_a) ** 2) + ((lon_b - lon_a) ** 2));
+    }*/
+     });
+	 
+	function distance(lat_a, lon_a, lat_b, lon_b)
+    {
+      return Math.sqrt(((lat_b - lat_a) ** 2) + ((lon_b - lon_a) ** 2));
+    }
+	//d_display = distance(latitude, longitude, stop["lat"], stop["long"]) * 111;
+	 
+     fetch('https://utils.pauliankline.com/stops.json')
+     .then(function(response) 
+		{
+			return response.json();
+	 })
+     .then(function(myJson) 
+		{
+			app.stops = myJson; //fetches content of stops from json file and stores in stops
+	 });
+	
+	//get geolocation
+     if ("geolocation" in navigator) {
+       app.message = "Geolocation is available.";
+     } else {
+       app.message = "Geolocation is not available.";
+     }
+	 
+    var watchID = navigator.geolocation.watchPosition(function(position) { //store latitude and longitude
+      app.latitude = position.coords.latitude;
+      app.longitude = position.coords.longitude;
+    });
+	
+
+   </script>
+
+ </body>
+</html>
